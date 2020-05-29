@@ -89,7 +89,6 @@ COLORS = ['#fe938c','#86e7b8','#f9ebe0','#208aae','#fe4a49',
 RANDOM_URLS = open('random_urls.txt').read().split('\n')[:-1]
 print("Running on:", DEVICE)
 
-
 # Start Dash
 app = dash.Dash(__name__)
 server = app.server  # Expose the server variable for deployments
@@ -109,20 +108,23 @@ app.layout = html.Div(className='container', children=[
     Row(dcc.Graph(id='model-output', style={"height": "70vh"})),
 
     Row([
-        Column(width=6, children=[
+        Column(width=7, children=[
             html.P('Non-maximum suppression (IoU):'),
-            dcc.Slider(
-                id='slider-iou', 
-                min=0, max=1, 
-                step=0.05, value=0.5, 
-                marks={0: '0', 1: '1'})
+            Row([
+                Column(width=3, children=dcc.Checklist(
+                    id='checklist-nms', 
+                    options=[{'label': 'Enabled', 'value': 'enabled'}],
+                    value=['enabled'])),
+
+                Column(width=9, children=dcc.Slider(
+                    id='slider-iou', min=0, max=1, step=0.05, value=0.5, 
+                    marks={0: '0', 1: '1'})),
+            ])
         ]),
-        Column(width=6, children=[
+        Column(width=5, children=[
             html.P('Confidence Threshold:'),
             dcc.Slider(
-                id='slider-confidence', 
-                min=0, max=1, 
-                step=0.05, value=0.7, 
+                id='slider-confidence', min=0, max=1, step=0.05, value=0.7, 
                 marks={0: '0', 1: '1'})
         ])
     ])
@@ -139,21 +141,26 @@ def randomize(random_n_clicks, run_n_clicks):
 
 
 @app.callback(
-    Output('model-output', 'figure'),
+    [Output('model-output', 'figure'),
+     Output('slider-iou', 'disabled')],
     [Input('button-run', 'n_clicks'),
      Input('input-url', 'n_submit'),
      Input('slider-iou', 'value'),
-     Input('slider-confidence', 'value')],
+     Input('slider-confidence', 'value'),
+     Input('checklist-nms', 'value')],
     [State('input-url', 'value')])
-def run_model(n_clicks, n_submit, iou, confidence, url):
+def run_model(n_clicks, n_submit, iou, confidence, checklist, url):
+    apply_nms = 'enabled' in checklist
     try:
         im = Image.open(requests.get(url, stream=True).raw)
     except:
         return go.Figure().update_layout(title='Incorrect URL')
 
     tstart = time.time()
+    
     scores, boxes = detect(im, detr, transform, device=DEVICE)
-    scores, boxes = filter_boxes(scores, boxes, confidence=confidence, iou=iou)
+    scores, boxes = filter_boxes(scores, boxes, confidence=confidence, iou=iou, apply_nms=apply_nms)
+    
     scores = scores.data.numpy()
     boxes = boxes.data.numpy()
 
@@ -180,7 +187,7 @@ def run_model(n_clicks, n_submit, iou, confidence, url):
 
         existing_classes.add(label)
 
-    return fig
+    return fig, not apply_nms
 
 
 if __name__ == '__main__':
