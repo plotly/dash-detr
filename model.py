@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from torchvision.ops import nms
+from torchvision.ops.boxes import batched_nms
 import torchvision.transforms as T
 
 
@@ -36,7 +36,8 @@ def filter_boxes(scores, boxes, confidence=0.7, apply_nms=True, iou=0.5):
     scores, boxes = scores[keep], boxes[keep]
 
     if apply_nms:
-        keep = nms(boxes, scores, iou)
+        top_scores, labels = scores.max(-1)
+        keep = batched_nms(boxes, top_scores, labels, iou)
         scores, boxes = scores[keep], boxes[keep]
 
     return scores, boxes
