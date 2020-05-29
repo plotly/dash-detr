@@ -1,0 +1,9 @@
+dash
+plotly
+gunicorn
+torch
+torchvision
+scipy
+numpy
+pandas
+Pillow
