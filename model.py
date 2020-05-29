@@ -62,7 +62,8 @@ CLASSES = [
 
 
 # Load model
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = 'cpu'
 detr = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
 detr.eval().to(DEVICE)
 

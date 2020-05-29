@@ -14,6 +14,19 @@ from model import detect, filter_boxes, detr, transform
 from model import CLASSES, DEVICE
 
 
+# Dash component wrappers
+def Row(children=None, **kwargs):
+    return html.Div(children, className="row", **kwargs)
+
+
+def Column(children=None, width=1, **kwargs):
+    nb_map = {
+        1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six',
+        7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten', 11: 'eleven', 12: 'twelve'}
+
+    return html.Div(children, className=f"{nb_map[width]} columns", **kwargs)
+
+
 # plotly.py helper functions
 def pil_to_b64(im, enc="png"):
     io_buf = BytesIO()
@@ -69,22 +82,9 @@ def add_bbox(fig, x0, y0, x1, y1,
     ))
 
 
-# Dash component wrappers
-def Row(children=None, **kwargs):
-    return html.Div(children, className="row", **kwargs)
-
-
-def Column(children=None, width=1, **kwargs):
-    nb_map = {
-        1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six',
-        7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten', 11: 'eleven', 12: 'twelve'}
-
-    return html.Div(children, className=f"{nb_map[width]} columns", **kwargs)
-
-
 # colors for visualization
-COLORS = [[0.000, 0.447, 0.741], [0.850, 0.325, 0.098], [0.929, 0.694, 0.125],
-          [0.494, 0.184, 0.556], [0.466, 0.674, 0.188], [0.301, 0.745, 0.933]] * 50
+COLORS = ['#fe938c','#86e7b8','#f9ebe0','#208aae','#fe4a49', 
+          '#291711', '#5f4b66', '#b98b82', '#87f5fb', '#63326e'] * 50
 
 RANDOM_URLS = open('random_urls.txt').read().split('\n')[:-1]
 print("Running on:", DEVICE)
@@ -99,12 +99,33 @@ app.layout = html.Div(className='container', children=[
 
     Row(html.P("Input Image URL:")),
     Row([
-        Column(dcc.Input(id='input-url', style={'width': '100%'}, placeholder='Insert URL...'), width=8),
+        Column(width=8, children=[
+            dcc.Input(id='input-url', style={'width': '100%'}, placeholder='Insert URL...'),
+        ]),
         Column(html.Button("Run DETR", id='button-run', n_clicks=0), width=2),
         Column(html.Button("Random Image", id='button-random', n_clicks=0), width=2)
     ]),
 
-    Row(dcc.Graph(id='model-output', style={"height": "80vh"}))
+    Row(dcc.Graph(id='model-output', style={"height": "70vh"})),
+
+    Row([
+        Column(width=6, children=[
+            html.P('Non-maximum suppression (IoU):'),
+            dcc.Slider(
+                id='slider-iou', 
+                min=0, max=1, 
+                step=0.05, value=0.5, 
+                marks={0: '0', 1: '1'})
+        ]),
+        Column(width=6, children=[
+            html.P('Confidence Threshold:'),
+            dcc.Slider(
+                id='slider-confidence', 
+                min=0, max=1, 
+                step=0.05, value=0.7, 
+                marks={0: '0', 1: '1'})
+        ])
+    ])
 ])
 
 
@@ -112,8 +133,7 @@ app.layout = html.Div(className='container', children=[
     [Output('button-run', 'n_clicks'),
      Output('input-url', 'value')],
     [Input('button-random', 'n_clicks')],
-    [State('button-run', 'n_clicks')]
-)
+    [State('button-run', 'n_clicks')])
 def randomize(random_n_clicks, run_n_clicks):
     return run_n_clicks+1, RANDOM_URLS[random_n_clicks%len(RANDOM_URLS)]
 
@@ -121,9 +141,11 @@ def randomize(random_n_clicks, run_n_clicks):
 @app.callback(
     Output('model-output', 'figure'),
     [Input('button-run', 'n_clicks'),
-     Input('input-url', 'n_submit')],
+     Input('input-url', 'n_submit'),
+     Input('slider-iou', 'value'),
+     Input('slider-confidence', 'value')],
     [State('input-url', 'value')])
-def run_model(n_clicks, n_submit, url):
+def run_model(n_clicks, n_submit, iou, confidence, url):
     try:
         im = Image.open(requests.get(url, stream=True).raw)
     except:
@@ -131,7 +153,7 @@ def run_model(n_clicks, n_submit, url):
 
     tstart = time.time()
     scores, boxes = detect(im, detr, transform, device=DEVICE)
-    scores, boxes = filter_boxes(scores, boxes, iou=0.5)
+    scores, boxes = filter_boxes(scores, boxes, confidence=confidence, iou=iou)
     scores = scores.data.numpy()
     boxes = boxes.data.numpy()
 
