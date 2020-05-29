@@ -4,6 +4,7 @@
 
 The release of [*DETR: End-to-End Object Detection with Transformers*](https://github.com/facebookresearch/detr) showed significant improvement in real-time object detection and panoptic segmentation (PS) while greatly simplifying the architecture. As a mean to test the model, we decided to build a simple [Dash](https://plotly.com/dash/) app that let you experiment and play with the model through a user interface.
 
+![demo](assets/dash_detr.gif)
 
 ## Overview
 
@@ -42,3 +43,8 @@ python app.py
 ## Modifying or extending the app
 
 To make it easy for you to extend the app by adding a custom model, we placed everything related to PyTorch and modeling in `model.py`, so you can add your own models without modifying the app. If you want to customize the layout or create new interactions, you can edit `app.py` (if you are not familiar with Dash, read the [tutorials](https://dash.plotly.com/installation) first.)
+
+## Productionizing Object Detection?
+
+If you are interested in deploy apps like this one for production, check out our article on [productionizing object detection models with Dash Enterprise](https://medium.com/plotly/productionizing-object-detection-models-with-dash-enterprise-dba1c9402c2f), or [reach out to us](https://plotly.com/get-demo/).
+
