@@ -1,16 +1,16 @@
 # Dash DETR Detection App
 
-*A User Interface for DETR built with Dash. 100% Python. Try it out: https://dash-gallery.plotly.host/dash-detr/*
+*A User Interface for DETR built with Dash. 100% Python. [Click here for a demo](https://dash-gallery.plotly.host/dash-detr/).*
 
-The release of [*DETR: End-to-End Object Detection with Transformers*](https://github.com/facebookresearch/detr) showed significant improvement in real-time object detection and panoptic segmentation (PS) while greatly simplifying the architecture. As a mean to test the model, we decided to build a simple [Dash](https://plotly.com/dash/) app that let you experiment and play with the model through a user interface.
+The release of [*DETR: End-to-End Object Detection with Transformers*](https://github.com/facebookresearch/detr) showed significant improvement in real-time object detection and panoptic segmentation (PS), while greatly simplifying the architecture. As a mean to test the model, we decided to build a simple [Dash](https://plotly.com/dash/) app that let you experiment and play with the model through a user interface.
 
 ![demo](assets/dash_detr.gif)
 
 ## Overview
 
-* The code is open-source and ready for you to fork.
-* Everything is in Pure Python - not a single line of HTML, CSS, or JavaScript required.
-* The app was written in 200 lines of code (in addition to modelling), and only took a few hours.
+* The code is open-source and ready to be forked.
+* Everything is in pure Python - not a single line of HTML, CSS, or JavaScript required.
+* The app was written 200 lines of code (in addition to modelling), and only took a few hours.
 * From development to production in minutes with [Dash Kubernetes](https://plotly.com/dash/kubernetes/) - no need to spend hours figuring out deployment.
 
 
