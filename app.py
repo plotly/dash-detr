@@ -114,7 +114,7 @@ app.layout = html.Div(className='container', children=[
                 Column(width=3, children=dcc.Checklist(
                     id='checklist-nms', 
                     options=[{'label': 'Enabled', 'value': 'enabled'}],
-                    value=['enabled'])),
+                    value=[])),
 
                 Column(width=9, children=dcc.Slider(
                     id='slider-iou', min=0, max=1, step=0.05, value=0.5, 
